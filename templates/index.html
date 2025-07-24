@@ -1,0 +1,23 @@
+<!-- calls layout.html -->
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{# 
+Jinja example block: % block content % ... % endblock %
+(Use {% block ... %} in templates that extend a base layout.)
+Defines a named section of HTML that can be filled in when a template extends another.
+#}
+
+{% block content %}
+<h2>Welcome to the Calculations App</h2>
+<p>Please login or register to start using the application.</p>
+{% endblock %}
+
+<!-- Jinja stuff, making it unparseable -->
+{# 
+Jinja block example: % block name % ... % endblock %
+Jinja variable: {{ '{{ variable_name }}' }}
+% ... % = Jinja statement
+{{ ... }} = Jinja expression/variable output
+#}
