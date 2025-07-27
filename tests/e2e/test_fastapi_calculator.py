@@ -1,10 +1,16 @@
 from datetime import datetime, timezone
+import time
 from uuid import uuid4
 import pytest
 import requests
+from playwright.sync_api import Page
 
 # Import the Calculation model for direct model tests.
 from app.models.calculation import Calculation
+from app.models.user import User
+from tests.conftest import create_fake_user
+from sqlalchemy.orm import Session
+
 
 # ---------------------------------------------------------------------------
 # Helper Fixtures and Functions
@@ -131,6 +137,53 @@ def test_user_login(base_url: str):
     assert expires_at.tzinfo is not None, "expires_at should be timezone-aware"
     assert current_time.tzinfo is not None, "current_time should be timezone-aware"
     assert expires_at > current_time, "Token expiration should be in the future"
+
+# ---------------------------------------------------------------------------
+# Positive Playwright tests
+# ---------------------------------------------------------------------------
+def test_register_with_valid_data_shows_success(page: Page):
+    page.goto("http://localhost:8000/register")
+
+    page.fill("#username", "validuser123")
+    page.fill("#email", "validuser123@example.com")
+    page.fill("#first_name", "Valid")
+    page.fill("#last_name", "User")
+    page.fill("#password", "ValidPass1!")
+    page.fill("#confirm_password", "ValidPass1!")
+
+    page.click("button[type='submit']")
+
+    # Wait for the success message text inside the alert (timeout 10s)
+    page.wait_for_selector("#successMessage:has-text('Registration successful')", timeout=10000)
+
+    # Optionally assert the container is visible too
+    success_alert = page.locator("#successAlert")
+    assert success_alert.is_visible()
+
+    # Wait for redirect to /login page
+    page.wait_for_url("**/login", timeout=10000)
+    assert "/login" in page.url
+
+
+def test_login_with_correct_credentials_stores_token(page: Page):
+    page.goto("http://localhost:8000/login")
+
+    # Fill login form with valid credentials
+    page.fill("#username", "validuser123")
+    page.fill("#password", "ValidPass1!")  # Use your valid password with special char if required
+
+    page.click("button[type='submit']")
+
+    # Wait for a success indication on the page, e.g. success alert or redirect
+    # Adjust selector based on your actual UI implementation
+    page.wait_for_selector("#successMessage:has-text('Login successful')", timeout=10000)
+
+    # Alternatively, check if tokens stored in localStorage (example keys)
+    token = page.evaluate("() => localStorage.getItem('access_token')")
+    refresh_token = page.evaluate("() => localStorage.getItem('refresh_token')")
+
+    assert token is not None and token != ""
+    assert refresh_token is not None and refresh_token != ""
 
 
 # ---------------------------------------------------------------------------
