@@ -49,6 +49,7 @@ def test_health_endpoint(base_url: str):
     assert response.status_code == 200, f"Expected status code 200 but got {response.status_code}. Response: {response.text}"
     assert response.json() == {"status": "ok"}, "Unexpected response from /health."
 
+# positive user registration test
 def test_user_registration(base_url: str):
     url = f"{base_url}/auth/register"
     payload = {
@@ -71,6 +72,7 @@ def test_user_registration(base_url: str):
     assert data["is_active"] is True
     assert data["is_verified"] is False
 
+# Positive user login test
 def test_user_login(base_url: str):
     reg_url = f"{base_url}/auth/register"
     login_url = f"{base_url}/auth/login"
@@ -129,6 +131,52 @@ def test_user_login(base_url: str):
     assert expires_at.tzinfo is not None, "expires_at should be timezone-aware"
     assert current_time.tzinfo is not None, "current_time should be timezone-aware"
     assert expires_at > current_time, "Token expiration should be in the future"
+
+
+# ---------------------------------------------------------------------------
+# Negative Playwright tests
+# ---------------------------------------------------------------------------
+def test_login_wrong_password_returns_401(page):
+    page.goto("http://localhost:8000/login")
+
+    page.fill("#username", "existinguser")
+    page.fill("#password", "WrongPass123!")
+
+    with page.expect_response("**/auth/login") as response_info:
+        page.click("button[type='submit']")
+
+    response = response_info.value
+    assert response.status == 401
+
+    # Wait for error alert to appear
+    page.locator("#errorAlert").wait_for(state="visible", timeout=5000)
+
+    # Check error message text
+    error_text = page.locator("#errorMessage").inner_text()
+    assert "invalid" in error_text.lower()
+
+def test_register_short_password_shows_error(page):
+    page.goto("http://localhost:8000/register")
+    page.wait_for_selector("#username")
+
+    # Fill form with invalid password
+    page.fill("#username", "newuser")
+    page.fill("#email", "newuser@example.com")
+    page.fill("#first_name", "John")
+    page.fill("#last_name", "Doe")
+    page.fill("#password", "123")  # too short, no uppercase, no lowercase
+    page.fill("#confirm_password", "123")
+
+    # Click submit button (client validation will prevent submission)
+    page.click("button[type='submit']")
+
+    # Wait for error alert to become visible
+    error_alert = page.locator("#errorAlert")
+    error_alert.wait_for(state="visible", timeout=5000)
+
+    error_text = error_alert.inner_text().lower()
+    assert "password" in error_text or "invalid" in error_text or "error" in error_text
+
 
 # ---------------------------------------------------------------------------
 # Calculations Endpoints Integration Tests
