@@ -166,7 +166,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.detail || 'Registration failed');
+                console.log('here!, error', data.detail[0])
+                throw new Error(data.detail[0].msg || 'Registration failed');
             }
 
             // Show success message
