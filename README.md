@@ -21,7 +21,7 @@
 ## Successful GitHub actions screenshot:
 ![github actions success](./screenshots/success%20github%20actions.png)
 
-## Successful Docker image deployment screenshots:
+## Docker Hub repository link:
 
 https://hub.docker.com/r/jeffches15/assignment13
 
