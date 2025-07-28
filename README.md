@@ -1,6 +1,50 @@
 # 📦 Project Setup
 
----
+## Screenshots of login and registration pages functioning correctly:
+![login success](./screenshots/login%20success.png)
+
+![register success](./screenshots/register%20success.png)
+
+
+## Screenshots of negative playwright tests successful:
+![wrong password test](./screenshots/wrong%20pass%20test.png)
+
+![short password test](./screenshots/wrong%20short%20pass%20test.png)
+
+
+## Screenshots of positive playwright tests successful:
+![login credentials test](./screenshots/login%20credentials%20test.png)
+
+![register valid data test](./screenshots/register%20valid%20data.png)
+
+
+## Successful GitHub actions screenshot:
+![github actions success](./screenshots/success%20github%20actions.png)
+
+## Successful Docker image deployment screenshots:
+
+https://hub.docker.com/r/jeffches15/assignment13
+
+
+## How to run tests locally
+In order to run these pytests, the first command to run is: docker compose up -d --build. This command builds the image if its not already there, and starts the containers and it in the background. This "unlocks" the terminal, allowing pytest commands to be entered. We need to run this docker command because we are interacting with a PostgreSQL database and a server to connect to.
+
+Running 'pytest' runs every test function in every test file, but I split this up into several commands. I ran pytest file by file in this order:
+
+- pytest -v -s tests/integration/test_user.py
+- pytest -v -s tests/integration/test_user.py --preserve-db (check data in PostgreSQL database)
+- pytest -v -s tests/integration/test_calculation.py
+   - testing Calculation model
+- pytest -v -s tests/integration/test_schema_base.py
+- pytest -v -s tests/integration/test_calculation_schema.py
+   - testing CalculationCreate and CalculationRead
+- pytest -v -s tests/integration/test_user_auth.py
+- pytest -v -s tests/integration/test_user_auth.py --preserve-db (check data in PostgreSQL)
+- pytest -v -s tests/integration/test_dependencies.py
+- pytest -v -s tests/integration/test_database.py
+- pytest -v -s tests/e2e/test_fastapi_calculator.py
+   - testing Playwright tests and other calculator endpoints
+- pytest -v -s tests/unit/test_calculator.py Note: -s: show print/log output: tells pytest not to capture stdout/sterr, so print() statements and logging messages are shown immediately in the terminal -v: verbose output: shows the full name and their individual results (e.g., PASSED, FAILED) of each test function instead of just a dot (.)
 
 # 🧩 1. Install Homebrew (Mac Only)
 
